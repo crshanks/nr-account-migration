@@ -128,6 +128,39 @@ def save_feature_settings_csv(fs_data: list):
         csv_writer.writerows(host_data + [""] for host_data in fs_data)
 
 
+def save_config_csv(config_name: str, fs_data: list):
+    output_dir = Path("output")
+    fs_file_name = config_name + '.csv'
+    fs_data_file = output_dir / fs_file_name
+    create_file(fs_data_file)
+    with open(str(fs_data_file), 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
+        # Counter variable used for writing headers to the CSV file
+        isHeaderSet = False
+        for data in fs_data:
+            if isinstance(data, list):
+                for element in data:
+                    if isHeaderSet == False:
+                        # Writing headers of CSV file
+                        header = element.keys()
+                        csv_writer.writerow(header)
+                        isHeaderSet = True
+                    # Writing data of CSV file
+                    csv_writer.writerow(element.values())
+            elif isinstance(data, object):
+                if isHeaderSet == False:
+                    # Writing headers of CSV file
+                    header = data.keys()
+                    csv_writer.writerow(header)
+                    isHeaderSet = True
+                # Writing data of CSV file
+                csv_writer.writerow(data.values())
+            else:
+                logger.error("Unexpected data type: ", type(data))
+        # Close file
+        csvfile.close()
+
+
 def load_names(from_file):
     names = []
     with open(from_file) as input_names:
