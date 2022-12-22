@@ -25,10 +25,16 @@ def get_config(func, user_api_key, from_file, region):
     # Strip the class name
     field = func.__name__
     for acct_id in acct_ids:
-        result = etmc.query(func, user_api_key, int(acct_id), region)
-        logger.info(json.dumps(result))
-        config = result['response']['data']['actor']['account'][field]['allRules']['rules']
-        configs.append(config)
+        try:
+            result = etmc.query(func, user_api_key, int(acct_id), region)
+            logger.info(json.dumps(result))
+            config = result['response']['data']['actor']['account'][field]['allRules']['rules']
+        except:
+            logger.error(f'Error querying {field} for account {acct_id}')
+        else:
+            for element in config:
+                element['accountId'] = acct_id
+            configs.append(config)
     logger.info(configs)
     store.save_config_csv(field, configs)
 

@@ -29,10 +29,15 @@ def get_config(func, user_api_key, from_file, region):
     # Strip the class name
     field = func.__name__
     for acct_id in acct_ids:
-        result = lcc.query(func, user_api_key, int(acct_id), region)
-        logger.info(json.dumps(result))
-        config = result['response']['data']['actor']['account']['logConfigurations'][field]
-        configs.append(config)
+        try:
+            result = lcc.query(func, user_api_key, int(acct_id), region)
+            logger.info(json.dumps(result))
+            config = result['response']['data']['actor']['account']['logConfigurations'][field]
+        except:
+            logger.error(f'Error querying {field} for account {acct_id}')
+        else:
+            # config['accountId'] = acct_id
+            configs.append(config)
     logger.info(configs)
     store.save_config_csv(field, configs)
 
@@ -55,7 +60,7 @@ def main():
     elif args.pipelineConfiguration:
         get_config(lcc.pipelineConfiguration, user_api_key, args.accounts[0], region)
     else:
-        logger.info("pass [--parsingRules | --parsingRules | --parsingRules | --parsingRules | --parsingRules] to fetch configuration")
+        logger.info("pass [--parsingRules | --dataPartitionRules | --obfuscationRules | --obfuscationExpressions | --pipelineConfiguration] to fetch configuration")
 
 
 if __name__ == '__main__':
